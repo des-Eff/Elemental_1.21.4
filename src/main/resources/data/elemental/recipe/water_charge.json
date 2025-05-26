@@ -1,0 +1,10 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        "elemental:brine_rod"
+    ],
+    "result": {
+        "id": "elemental:water_charge",
+        "count": 4
+    }
+}

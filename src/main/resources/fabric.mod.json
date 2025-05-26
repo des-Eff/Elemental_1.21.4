@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "elemental",
+	"version": "${version}",
+	"name": "Elemental",
+	"description": "A mod that adds the elemental mobs Brine & Bore.",
+	"authors": [
+		"desired_effect"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/des-Eff/Elemental_1.21.4"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/elemental/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.deseff.elemental.Elemental"
+		],
+		"client": [
+			"net.deseff.elemental.ElementalClient"
+		],
+		"fabric-datagen": [
+			"net.deseff.elemental.ElementalDataGenerator"
+		]
+	},
+	"mixins": [
+		"elemental.mixins.json",
+		{
+			"config": "elemental.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
