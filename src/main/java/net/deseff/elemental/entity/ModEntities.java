@@ -16,8 +16,8 @@ public class ModEntities {
             Registries.ENTITY_TYPE,
             Identifier.of(Elemental.MOD_ID, "brine"),
             EntityType.Builder.create(BrineEntity::new, SpawnGroup.MONSTER)
-                    .dimensions(0.75F, 1.5F)
-                    .eyeHeight(0.75F)
+                    .dimensions(0.9F, 1.75F)
+                    .eyeHeight(1.375F)
                     .build(BRINE_ENTITY_KEY)
     );
 

@@ -44,10 +44,11 @@ public class WaterChargeItem extends Item {
 
         user.addVelocity(j, k, l);
         user.useRiptide(tideTicks, 1.0F, itemStack);
-            if (user.isOnGround()) {
-                float n = 1.1999999F;
-                user.move(MovementType.SELF, new Vec3d(0.0, n, 0.0));
-            }
+        if (user.isOnGround()) {
+            float n = 1.1999999F;
+            user.move(MovementType.SELF, new Vec3d(0.0, n, 0.0));
+        }
+        user.fallDistance = -12.0F;
         world.playSound(
                 null,
                 user.getX(),
