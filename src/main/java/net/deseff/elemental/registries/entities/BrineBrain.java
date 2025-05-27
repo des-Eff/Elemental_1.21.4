@@ -7,6 +7,8 @@ import com.mojang.datafixers.util.Pair;
 
 import com.google.common.collect.*;
 
+import net.deseff.elemental.ai.BrineDashTask;
+import net.deseff.elemental.ai.ModMemoryModules;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.sensor.*;
 import net.minecraft.entity.ai.brain.*;
@@ -26,9 +28,14 @@ public class BrineBrain { //TODO: attack behavior
             MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
             MemoryModuleType.ATTACK_TARGET,
             MemoryModuleType.WALK_TARGET,
+            ModMemoryModules.BRINE_DASH,
+            ModMemoryModules.BRINE_DASH_CHARGING,
+            ModMemoryModules.BRINE_DASH_RECOVER,
+            ModMemoryModules.BRINE_DASH_COOLDOWN,
             MemoryModuleType.HURT_BY,
             MemoryModuleType.HURT_BY_ENTITY,
-            MemoryModuleType.PATH
+            MemoryModuleType.PATH,
+            ModMemoryModules.BRINE_DASH
     );
     private static final int TIME_BEFORE_FORGETTING_TARGET = 100;
 
@@ -71,7 +78,9 @@ public class BrineBrain { //TODO: attack behavior
         brain.setTaskList(
                 Activity.FIGHT,
                 ImmutableList.of(
-                        Pair.of(0, ForgetAttackTargetTask.create(Sensor.hasTargetBeenAttackableRecently(brine, 100).negate()::test))
+                        Pair.of(0, ForgetAttackTargetTask.create(Sensor.hasTargetBeenAttackableRecently(brine, 100).negate()::test)),
+                        Pair.of(1, new BrineDashTask())
+                        //put other tasks here
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryModuleState.VALUE_PRESENT), Pair.of(MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT)
@@ -83,9 +92,9 @@ public class BrineBrain { //TODO: attack behavior
     		brain.setTaskList(
     			Activity.SWIM,
     			ImmutableList.of(
-    				Pair.of(0, UpdateAttackTargetTask.create((world, brine) -> brine.getBrain().getOptionalRegisteredMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
-                  Pair.of(1, UpdateAttackTargetTask.create((world, brine) -> brine.getHurtBy())),
-    				Pair.of(
+                        Pair.of(0, UpdateAttackTargetTask.create((world, brine) -> brine.getBrain().getOptionalRegisteredMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
+                        Pair.of(1, UpdateAttackTargetTask.create((world, brine) -> brine.getHurtBy())),
+                        Pair.of(
     					3,
     					new CompositeTask<>(
     						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT),

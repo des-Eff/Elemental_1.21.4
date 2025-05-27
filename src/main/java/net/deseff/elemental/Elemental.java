@@ -1,5 +1,6 @@
 package net.deseff.elemental;
 
+import net.deseff.elemental.ai.ModMemoryModules;
 import net.deseff.elemental.entity.ModEntities;
 import net.deseff.elemental.item.ModItems;
 import net.deseff.elemental.registries.entities.BrineEntity;
@@ -23,7 +24,7 @@ public class Elemental implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ModItems.initialize();
-
+		ModMemoryModules.init();
 		FabricDefaultAttributeRegistry.register(ModEntities.BRINE, BrineEntity.createBrineAttributes());
 
 		LOGGER.info("Hello Fabric world!");

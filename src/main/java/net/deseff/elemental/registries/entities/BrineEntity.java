@@ -196,5 +196,11 @@ public class BrineEntity extends HostileEntity {
         return this.isInsideWaterOrBubbleColumn() ? SWIMMING_BASE_DIMENSIONS : super.getBaseDimensions(pose);
     }
 
+    @Override
+    protected void sendAiDebugData() {
+        super.sendAiDebugData();
+        DebugInfoSender.sendBrainDebugData(this);
+    }
+
 
 }
