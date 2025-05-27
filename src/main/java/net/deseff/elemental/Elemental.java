@@ -1,6 +1,7 @@
 package net.deseff.elemental;
 
 import net.deseff.elemental.ai.ModMemoryModules;
+import net.deseff.elemental.ai.ModSensorTypes;
 import net.deseff.elemental.entity.ModEntities;
 import net.deseff.elemental.item.ModItems;
 import net.deseff.elemental.registries.entities.BrineEntity;
@@ -23,7 +24,9 @@ public class Elemental implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		ModEntities.registerModEntities();
 		ModItems.initialize();
+		ModSensorTypes.init();
 		ModMemoryModules.init();
 		FabricDefaultAttributeRegistry.register(ModEntities.BRINE, BrineEntity.createBrineAttributes());
 

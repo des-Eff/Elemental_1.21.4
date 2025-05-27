@@ -9,16 +9,21 @@ import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleState;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.MultiTickTask;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Unit;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.Vec3d;
 
 public class BrineDashTask extends MultiTickTask<BrineEntity> {
 
     //Variables here
     private static final int MAX_SQUARED_RANGE = 256;
     private static final int DASH_CHARGING_EXPIRY = Math.round(15.0F);
-    private static final int RECOVER_EXPIRY = Math.round(4.0F);
-    public static final int DASH_COOLDOWN_EXPIRY = Math.round(10.0F);
+    private static final int RECOVER_EXPIRY = Math.round(20.0F);
+    public static final int DASH_COOLDOWN_EXPIRY = Math.round(30.0F);
+    public static final double DASH_POWER_MULTIPLIER = 1.0F;
+
 
 
     public BrineDashTask() {
@@ -31,15 +36,15 @@ public class BrineDashTask extends MultiTickTask<BrineEntity> {
                 MemoryModuleState.VALUE_ABSENT,
                 ModMemoryModules.BRINE_DASH_RECOVER,
                 MemoryModuleState.VALUE_ABSENT,
-                ModMemoryModules.BRINE_DASH,
-                MemoryModuleState.VALUE_PRESENT,
+//                ModMemoryModules.BRINE_DASH,
+//                MemoryModuleState.VALUE_PRESENT,
                 MemoryModuleType.WALK_TARGET,
                 MemoryModuleState.VALUE_ABSENT
                 ),
                 DASH_CHARGING_EXPIRY + 1 + RECOVER_EXPIRY);
     }
     protected boolean shouldRun(ServerWorld serverWorld, BrineEntity brineEntity) {
-        return brineEntity.getPose() != EntityPose.SWIMMING
+        return !brineEntity.isInsideWaterOrBubbleColumn() || !brineEntity.getBrain().getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).get().isInsideWaterOrBubbleColumn()
                 ? false
                 : (Boolean) brineEntity.getBrain()
                 .getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET)
@@ -54,7 +59,9 @@ public class BrineDashTask extends MultiTickTask<BrineEntity> {
     }
 
     protected boolean shouldKeepRunning(ServerWorld serverWorld, BrineEntity brineEntity, long l) {
-        return brineEntity.getBrain().hasMemoryModule(MemoryModuleType.ATTACK_TARGET) && brineEntity.getBrain().hasMemoryModule(ModMemoryModules.BRINE_DASH);
+        return brineEntity.getBrain().hasMemoryModule(MemoryModuleType.ATTACK_TARGET)
+                //&& brineEntity.getBrain().hasMemoryModule(ModMemoryModules.BRINE_DASH)
+        ;
     }
     protected void run(ServerWorld serverWorld, BrineEntity brineEntity, long l) {
         brineEntity.getBrain().getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(target -> brineEntity.setPose(EntityPose.SHOOTING));
@@ -77,17 +84,14 @@ public class BrineDashTask extends MultiTickTask<BrineEntity> {
             brineEntity.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, livingEntity.getPos());
             if (!brain.getOptionalRegisteredMemory(ModMemoryModules.BRINE_DASH_CHARGING).isPresent()
                 && !brain.getOptionalRegisteredMemory(ModMemoryModules.BRINE_DASH_RECOVER).isPresent()) {
+
+                Vec3d dashDir = livingEntity.getPos().add(0, livingEntity.getStandingEyeHeight() * 0.5, 0)
+                        .subtract(brineEntity.getPos()).normalize().multiply(DASH_POWER_MULTIPLIER);
+                brineEntity.setVelocity(dashDir);
+                brineEntity.velocityModified = true;
+
                 brain.remember(ModMemoryModules.BRINE_DASH_RECOVER, Unit.INSTANCE, RECOVER_EXPIRY);
-
-//				double d = livingEntity.getX() - breezeEntity.getX();
-//				double e = livingEntity.getBodyY(livingEntity.hasVehicle() ? 0.8 : 0.3) - breezeEntity.getChargeY();
-//				double f = livingEntity.getZ() - breezeEntity.getZ();
-//				ProjectileEntity.spawnWithVelocity(
-//					new BreezeWindChargeEntity(breezeEntity, serverWorld), serverWorld, ItemStack.EMPTY, d, e, f, 0.7F, 5 - serverWorld.getDifficulty().getId() * 4
-//				);
-
-//				brineEntity.playSound(SoundEvents.ENTITY_BRINE_DASH, 1.5F, 1.0F);
-
+                brineEntity.playSound(SoundEvents.ENTITY_BREEZE_SHOOT, 1.5F, 1.0F);
             }
         }
     }
