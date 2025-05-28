@@ -38,7 +38,7 @@ import java.util.Optional;
 public class BrineEntity extends HostileEntity {
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState swimAnimationState = new AnimationState();
-    private static final EntityDimensions SWIMMING_BASE_DIMENSIONS = ModEntities.BRINE.getDimensions().scaled(1.0F,0.75F);
+    private static final EntityDimensions SWIMMING_BASE_DIMENSIONS = ModEntities.BRINE.getDimensions().scaled(1.0F,0.5F);
     private boolean wasInWaterLastTick = false;
     private boolean hasAttackedDuringDash = false;
 
@@ -194,7 +194,7 @@ public class BrineEntity extends HostileEntity {
                 LivingEntity target = (LivingEntity) this.getBrain()
                     .getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
 
-                if (target != null && this.squaredDistanceTo(target) <1.0D && !this.hasAttackedDuringDash) {
+                if (target != null && this.squaredDistanceTo(target) <0.75D && !this.hasAttackedDuringDash) {
                     this.hasAttackedDuringDash = true; // Add this boolean field to prevent multiple hits
                     //deal damage here ig
                     target.damage((ServerWorld) this.getWorld(), getDamageSources().mobAttack(this), (float) this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE)*1.5F);
