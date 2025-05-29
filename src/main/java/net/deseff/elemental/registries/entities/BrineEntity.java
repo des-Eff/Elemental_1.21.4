@@ -4,9 +4,11 @@ import com.mojang.serialization.Dynamic;
 import net.deseff.elemental.ai.ModMemoryModules;
 import net.deseff.elemental.entity.ModEntities;
 import net.minecraft.entity.*;
+import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.control.AquaticMoveControl;
+import net.minecraft.entity.ai.control.LookControl;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.ai.pathing.AmphibiousSwimNavigation;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
@@ -16,6 +18,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
@@ -30,15 +33,20 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.entity.damage.*;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Optional;
 
 
-//TODO: get attack behavior
-public class BrineEntity extends HostileEntity {
+public class BrineEntity extends HostileEntity implements GeoEntity {
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState swimAnimationState = new AnimationState();
     private static final EntityDimensions SWIMMING_BASE_DIMENSIONS = ModEntities.BRINE.getDimensions().scaled(1.0F,0.5F);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean wasInWaterLastTick = false;
     private boolean hasAttackedDuringDash = false;
 
@@ -70,17 +78,17 @@ public class BrineEntity extends HostileEntity {
         return HostileEntity.createHostileAttributes()
                 .add(EntityAttributes.ATTACK_DAMAGE, 4.0F)
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.2F)
-                .add(EntityAttributes.MAX_HEALTH, 30.0F)
+                .add(EntityAttributes.MAX_HEALTH, 25.0F)
                 .add(EntityAttributes.STEP_HEIGHT, 1.125F);
     }
 
+    //TODO: turn this into a Brain goal
     @Override
     protected void initGoals() {
         super.initGoals();
 
         this.goalSelector.add(1, new BrineMeleeAttackGoal(this, 1.2F, true));
     }
-
     public class BrineMeleeAttackGoal extends MeleeAttackGoal {
 
         public BrineMeleeAttackGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
@@ -105,7 +113,7 @@ public class BrineEntity extends HostileEntity {
         this.getBrain().getOptionalMemory(MemoryModuleType.ATTACK_TARGET)
                 .ifPresentOrElse(this::setTarget, () -> this.setTarget(null));
 
-        boolean inWater = this.isInsideWaterOrBubbleColumn();
+        boolean inWater = this.isTouchingWater();
 
         if (inWater != wasInWaterLastTick) {
             this.calculateDimensions();
@@ -255,6 +263,36 @@ public class BrineEntity extends HostileEntity {
     @Override
     public boolean canSpawn(WorldView world) {
         return world.doesNotIntersectEntities(this);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        // Register animation controllers here
+        AnimationController<BrineEntity> main = new AnimationController<>(this, "controller", 0, this::predicate);
+        controllers.add(main);
+
+    }
+
+    //If bad things happen, this method is the culprit
+    private PlayState predicate(software.bernie.geckolib.animation.AnimationState<BrineEntity> brineEntityAnimationState) {
+
+        if (this.isInsideWaterOrBubbleColumn() && !wasInWaterLastTick) {
+            brineEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("brine.walktoswim", Animation.LoopType.PLAY_ONCE));
+        } else if (!this.isInsideWaterOrBubbleColumn() && wasInWaterLastTick) {
+            brineEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("brine.swimtowalk", Animation.LoopType.PLAY_ONCE));
+        }
+
+        if (this.isInsideWaterOrBubbleColumn()) {
+            brineEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("brine.swim", Animation.LoopType.LOOP));
+        } else {
+            brineEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("brine.walk", Animation.LoopType.LOOP));
+        }
+        return PlayState.CONTINUE;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
     }
 
 }
