@@ -17,7 +17,6 @@ import net.minecraft.entity.ai.brain.*;
 import net.minecraft.entity.ai.brain.task.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
 
 
 public class BrineBrain { //TODO: attack behavior
@@ -79,6 +78,7 @@ public class BrineBrain { //TODO: attack behavior
         ));
 
     }
+    //TODO: make it approach on land but not underwater
     private static void addFightTasks(BrineEntity brine, Brain<BrineEntity> brain) {
         brain.setTaskList(
                 Activity.FIGHT,

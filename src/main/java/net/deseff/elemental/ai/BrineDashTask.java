@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3d;
 public class BrineDashTask extends MultiTickTask<BrineEntity> {
 
     //Variables here
+    //TODO: fix logic for kills (stop dashing if they're dead)
     private static final int MAX_SQUARED_RANGE = 256;
     private static final int DASH_CHARGING_EXPIRY = Math.round(15.0F);
     private static final int RECOVER_EXPIRY = Math.round(20.0F);
@@ -59,13 +60,17 @@ public class BrineDashTask extends MultiTickTask<BrineEntity> {
     }
 
     protected boolean shouldKeepRunning(ServerWorld serverWorld, BrineEntity brineEntity, long l) {
+        brineEntity.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES,
+                brineEntity.getBrain().getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).orElse(null).getPos());
         return brineEntity.getBrain().hasMemoryModule(MemoryModuleType.ATTACK_TARGET)
                 //&& brineEntity.getBrain().hasMemoryModule(ModMemoryModules.BRINE_DASH)
         ;
+
     }
     protected void run(ServerWorld serverWorld, BrineEntity brineEntity, long l) {
         brineEntity.getBrain().getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(target -> brineEntity.setPose(EntityPose.SHOOTING));
         brineEntity.getBrain().remember(ModMemoryModules.BRINE_DASH_CHARGING, Unit.INSTANCE, DASH_CHARGING_EXPIRY);
+
 //		brineEntity.playSound(SoundEvents.ENTITY_BRINE_CHARGE, 1.0F, 1.0F);
     }
 
@@ -78,6 +83,7 @@ public class BrineDashTask extends MultiTickTask<BrineEntity> {
 	}
 
     protected void keepRunning(ServerWorld serverWorld, BrineEntity brineEntity, long l) {
+
         Brain<BrineEntity> brain = brineEntity.getBrain();
         LivingEntity livingEntity = (LivingEntity)brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
         if (livingEntity != null) {
