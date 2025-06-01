@@ -7,7 +7,16 @@ import net.deseff.elemental.item.ModItems;
 import net.deseff.elemental.registries.entities.BrineEntity;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.RepairableComponent;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntryList;
+import org.intellij.lang.annotations.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +35,13 @@ public class Elemental implements ModInitializer {
 		// Proceed with mild caution.
 		ModEntities.registerModEntities();
 		ModItems.initialize();
+//
+//		DefaultItemComponentEvents.MODIFY.register(context -> {
+//			context.modify(Items.TRIDENT, builder -> {
+//				builder.add(DataComponentTypes.REPAIRABLE, new RepairableComponent());
+//			});
+//		});
+//
 		ModSensorTypes.init();
 		ModMemoryModules.init();
 		FabricDefaultAttributeRegistry.register(ModEntities.BRINE, BrineEntity.createBrineAttributes());
