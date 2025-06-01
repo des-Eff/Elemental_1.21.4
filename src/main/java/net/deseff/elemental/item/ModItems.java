@@ -3,6 +3,7 @@ package net.deseff.elemental.item;
 import net.deseff.elemental.Elemental;
 import net.deseff.elemental.entity.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.SpawnEggItem;
@@ -11,6 +12,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 
 import java.util.function.Function;
 
@@ -36,7 +38,10 @@ public class ModItems {
 
     public static final Item BRINE_SPAWN_EGG = register("brine_spawn_egg", (settings) -> new SpawnEggItem(ModEntities.BRINE, settings), new Item.Settings());
 
-        public static void initialize() {
+//    public static final Item LANCE = register("lance", LanceItem::new, (new Item.Settings()).rarity(Rarity.EPIC).maxDamage(500).component(DataComponentTypes.TOOL, LanceItem.createToolComponent()).attributeModifiers(LanceItem.createAttributeModifiers()));
+
+
+    public static void initialize() {
             // Get the event for modifying entries in the group.
     		// And register an event handler that adds our item to its group.
     		ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS)
@@ -47,5 +52,8 @@ public class ModItems {
 
             ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS)
                     .register((itemGroup) -> itemGroup.add(ModItems.BRINE_SPAWN_EGG));
+
+//            ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT)
+//                    .register((itemGroup) -> itemGroup.add(ModItems.LANCE));
         }
 }
